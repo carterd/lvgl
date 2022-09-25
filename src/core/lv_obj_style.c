@@ -89,6 +89,7 @@ void lv_obj_add_style(lv_obj_t * obj, const lv_style_t * style, lv_style_selecto
 
     /*Allocate space for the new style and shift the rest of the style to the end*/
     obj->style_cnt++;
+    LV_ASSERT(obj->style_cnt != 0);
     obj->styles = lv_realloc(obj->styles, obj->style_cnt * sizeof(_lv_obj_style_t));
     LV_ASSERT_MALLOC(obj->styles);
 
@@ -223,7 +224,7 @@ void lv_obj_enable_style_refresh(bool en)
 
 lv_style_value_t lv_obj_get_style_prop(const lv_obj_t * obj, lv_part_t part, lv_style_prop_t prop)
 {
-    lv_style_value_t value_act;
+    lv_style_value_t value_act = { .ptr = NULL };
     bool inheritable = lv_style_prop_has_flag(prop, LV_STYLE_PROP_FLAG_INHERITABLE);
     lv_style_res_t found = LV_STYLE_RES_NOT_FOUND;
     while(obj) {
@@ -519,6 +520,7 @@ static lv_style_t * get_local_style(lv_obj_t * obj, lv_style_selector_t selector
     }
 
     obj->style_cnt++;
+    LV_ASSERT(obj->style_cnt != 0);
     obj->styles = lv_realloc(obj->styles, obj->style_cnt * sizeof(_lv_obj_style_t));
     LV_ASSERT_MALLOC(obj->styles);
 
@@ -556,6 +558,7 @@ static _lv_obj_style_t * get_trans_style(lv_obj_t * obj,  lv_style_selector_t se
     if(i != obj->style_cnt) return &obj->styles[i];
 
     obj->style_cnt++;
+    LV_ASSERT(obj->style_cnt != 0);
     obj->styles = lv_realloc(obj->styles, obj->style_cnt * sizeof(_lv_obj_style_t));
 
     for(i = obj->style_cnt - 1; i > 0 ; i--) {

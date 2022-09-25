@@ -407,7 +407,7 @@
 #define LV_TXT_ENC LV_TXT_ENC_UTF8
 
 /*Can break (wrap) texts on these chars*/
-#define LV_TXT_BREAK_CHARS " ,.;:-_"
+#define LV_TXT_BREAK_CHARS " ,.;:-_)]}"
 
 /*If a word is at least this long, will break wherever "prettiest"
  *To disable, set to a value <= 0*/
@@ -694,6 +694,17 @@
         #define LV_IME_PINYIN_K9_CAND_TEXT_NUM 3
     #endif // LV_IME_PINYIN_USE_K9_MODE
 #endif
+
+/*1: Enable file explorer*/
+/*Requires: lv_table*/
+#define LV_USE_FILE_EXPLORER                     0
+#if LV_USE_FILE_EXPLORER
+    /*Maximum length of path*/
+    #define LV_FILE_EXPLORER_PATH_MAX_LEN        (128)
+    /*Quick access bar, 1:use, 0:not use*/
+    /*Requires: lv_list*/
+    #define LV_FILE_EXPLORER_QUICK_ACCESS        1
+#endif  
 
 /*==================
 * EXAMPLES
