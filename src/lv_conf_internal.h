@@ -104,6 +104,15 @@
         #endif
     #endif
 
+    /*Size of the memory expand for `lv_malloc()` in bytes*/
+    #ifndef LV_MEM_POOL_EXPAND_SIZE
+        #ifdef CONFIG_LV_MEM_POOL_EXPAND_SIZE
+            #define LV_MEM_POOL_EXPAND_SIZE CONFIG_LV_MEM_POOL_EXPAND_SIZE
+        #else
+            #define LV_MEM_POOL_EXPAND_SIZE 0
+        #endif
+    #endif
+
     /*Set an address for the memory pool instead of allocating it as a normal array. Can be in external SRAM too.*/
     #ifndef LV_MEM_ADR
         #ifdef CONFIG_LV_MEM_ADR
@@ -171,6 +180,20 @@
         #define LV_STDLIB_INCLUDE CONFIG_LV_STDLIB_INCLUDE
     #else
         #define LV_STDLIB_INCLUDE <stdint.h>
+    #endif
+#endif
+#ifndef LV_STDIO_INCLUDE
+    #ifdef CONFIG_LV_STDIO_INCLUDE
+        #define LV_STDIO_INCLUDE CONFIG_LV_STDIO_INCLUDE
+    #else
+        #define LV_STDIO_INCLUDE  <stdint.h>
+    #endif
+#endif
+#ifndef LV_STRING_INCLUDE
+    #ifdef CONFIG_LV_STRING_INCLUDE
+        #define LV_STRING_INCLUDE CONFIG_LV_STRING_INCLUDE
+    #else
+        #define LV_STRING_INCLUDE <stdint.h>
     #endif
 #endif
 #ifndef LV_MALLOC
@@ -491,6 +514,20 @@
     #endif
 #endif
 
+/*Use GD32 IPA GPU
+ * This adds support for Image Processing Accelerator on GD32F450 and GD32F470 series MCUs
+ *
+ * NOTE: IPA on GD32F450 has a bug where the fill operation overwrites data beyond the
+ * framebuffer. This driver works around it by saving and restoring affected memory, but
+ * this makes it not thread-safe. GD32F470 is not affected. */
+#ifndef LV_USE_GPU_GD32_IPA
+    #ifdef CONFIG_LV_USE_GPU_GD32_IPA
+        #define LV_USE_GPU_GD32_IPA CONFIG_LV_USE_GPU_GD32_IPA
+    #else
+        #define LV_USE_GPU_GD32_IPA 0
+    #endif
+#endif
+
 /*Use NXP's PXP GPU iMX RTxxx platforms*/
 #ifndef LV_USE_GPU_NXP_PXP
     #ifdef CONFIG_LV_USE_GPU_NXP_PXP
@@ -687,6 +724,17 @@
             #define LV_LOG_TRACE_ANIM       1
         #endif
     #endif
+	#ifndef LV_LOG_TRACE_MSG
+	    #ifdef _LV_KCONFIG_PRESENT
+	        #ifdef CONFIG_LV_LOG_TRACE_MSG
+	            #define LV_LOG_TRACE_MSG CONFIG_LV_LOG_TRACE_MSG
+	        #else
+	            #define LV_LOG_TRACE_MSG 0
+	        #endif
+	    #else
+	        #define LV_LOG_TRACE_MSG		1
+	    #endif
+	#endif
 
 #endif  /*LV_USE_LOG*/
 
@@ -2116,6 +2164,15 @@
     #endif
 #endif
 
+/*Barcode code library*/
+#ifndef LV_USE_BARCODE
+    #ifdef CONFIG_LV_USE_BARCODE
+        #define LV_USE_BARCODE CONFIG_LV_USE_BARCODE
+    #else
+        #define LV_USE_BARCODE 0
+    #endif
+#endif
+
 /*FreeType library*/
 #ifndef LV_USE_FREETYPE
     #ifdef CONFIG_LV_USE_FREETYPE
@@ -2125,40 +2182,68 @@
     #endif
 #endif
 #if LV_USE_FREETYPE
-    /*Memory used by FreeType to cache characters [bytes] (-1: no caching)*/
+    /*Memory used by FreeType to cache characters [bytes]*/
     #ifndef LV_FREETYPE_CACHE_SIZE
         #ifdef CONFIG_LV_FREETYPE_CACHE_SIZE
             #define LV_FREETYPE_CACHE_SIZE CONFIG_LV_FREETYPE_CACHE_SIZE
         #else
-            #define LV_FREETYPE_CACHE_SIZE (16 * 1024)
+            #define LV_FREETYPE_CACHE_SIZE (64 * 1024)
         #endif
     #endif
-    #if LV_FREETYPE_CACHE_SIZE >= 0
-        /* 1: bitmap cache use the sbit cache, 0:bitmap cache use the image cache. */
-        /* sbit cache:it is much more memory efficient for small bitmaps(font size < 256) */
-        /* if font size >= 256, must be configured as image cache */
-        #ifndef LV_FREETYPE_SBIT_CACHE
-            #ifdef CONFIG_LV_FREETYPE_SBIT_CACHE
-                #define LV_FREETYPE_SBIT_CACHE CONFIG_LV_FREETYPE_SBIT_CACHE
-            #else
-                #define LV_FREETYPE_SBIT_CACHE 0
-            #endif
+
+    /*Let FreeType to use LVGL memory and file porting*/
+    #ifndef LV_FREETYPE_USE_LVGL_PORT
+        #ifdef CONFIG_LV_FREETYPE_USE_LVGL_PORT
+            #define LV_FREETYPE_USE_LVGL_PORT CONFIG_LV_FREETYPE_USE_LVGL_PORT
+        #else
+            #define LV_FREETYPE_USE_LVGL_PORT 0
         #endif
-        /* Maximum number of opened FT_Face/FT_Size objects managed by this cache instance. */
-        /* (0:use system defaults) */
-        #ifndef LV_FREETYPE_CACHE_FT_FACES
-            #ifdef CONFIG_LV_FREETYPE_CACHE_FT_FACES
-                #define LV_FREETYPE_CACHE_FT_FACES CONFIG_LV_FREETYPE_CACHE_FT_FACES
-            #else
-                #define LV_FREETYPE_CACHE_FT_FACES 0
-            #endif
+    #endif
+
+    /* 1: bitmap cache use the sbit cache, 0:bitmap cache use the image cache. */
+    /* sbit cache:it is much more memory efficient for small bitmaps(font size < 256) */
+    /* if font size >= 256, must be configured as image cache */
+    #ifndef LV_FREETYPE_SBIT_CACHE
+        #ifdef CONFIG_LV_FREETYPE_SBIT_CACHE
+            #define LV_FREETYPE_SBIT_CACHE CONFIG_LV_FREETYPE_SBIT_CACHE
+        #else
+            #define LV_FREETYPE_SBIT_CACHE 0
         #endif
-        #ifndef LV_FREETYPE_CACHE_FT_SIZES
-            #ifdef CONFIG_LV_FREETYPE_CACHE_FT_SIZES
-                #define LV_FREETYPE_CACHE_FT_SIZES CONFIG_LV_FREETYPE_CACHE_FT_SIZES
-            #else
-                #define LV_FREETYPE_CACHE_FT_SIZES 0
-            #endif
+    #endif
+
+    /* Maximum number of opened FT_Face/FT_Size objects managed by this cache instance. */
+    /* (0:use system defaults) */
+    #ifndef LV_FREETYPE_CACHE_FT_FACES
+        #ifdef CONFIG_LV_FREETYPE_CACHE_FT_FACES
+            #define LV_FREETYPE_CACHE_FT_FACES CONFIG_LV_FREETYPE_CACHE_FT_FACES
+        #else
+            #define LV_FREETYPE_CACHE_FT_FACES 4
+        #endif
+    #endif
+    #ifndef LV_FREETYPE_CACHE_FT_SIZES
+        #ifdef CONFIG_LV_FREETYPE_CACHE_FT_SIZES
+            #define LV_FREETYPE_CACHE_FT_SIZES CONFIG_LV_FREETYPE_CACHE_FT_SIZES
+        #else
+            #define LV_FREETYPE_CACHE_FT_SIZES 4
+        #endif
+    #endif
+#endif
+
+/* Built-in TTF decoder */
+#ifndef LV_USE_TINY_TTF
+    #ifdef CONFIG_LV_USE_TINY_TTF
+        #define LV_USE_TINY_TTF CONFIG_LV_USE_TINY_TTF
+    #else
+        #define LV_USE_TINY_TTF 0
+    #endif
+#endif
+#if LV_USE_TINY_TTF
+    /* Enable loading TTF data from files */
+    #ifndef LV_TINY_TTF_FILE_SUPPORT
+        #ifdef CONFIG_LV_TINY_TTF_FILE_SUPPORT
+            #define LV_TINY_TTF_FILE_SUPPORT CONFIG_LV_TINY_TTF_FILE_SUPPORT
+        #else
+            #define LV_TINY_TTF_FILE_SUPPORT 0
         #endif
     #endif
 #endif
@@ -2356,7 +2441,7 @@
             #define LV_FILE_EXPLORER_QUICK_ACCESS        1
         #endif
     #endif
-#endif  
+#endif
 
 /*==================
 * EXAMPLES
@@ -2477,6 +2562,15 @@
         #else
             #define LV_DEMO_MUSIC_AUTO_PLAY 0
         #endif
+    #endif
+#endif
+
+/*Flex layout demo*/
+#ifndef LV_USE_DEMO_FLEX_LAYOUT
+    #ifdef CONFIG_LV_USE_DEMO_FLEX_LAYOUT
+        #define LV_USE_DEMO_FLEX_LAYOUT CONFIG_LV_USE_DEMO_FLEX_LAYOUT
+    #else
+        #define LV_USE_DEMO_FLEX_LAYOUT 0
     #endif
 #endif
 

@@ -75,6 +75,8 @@ void _lv_obj_style_init(void)
 
 void lv_obj_add_style(lv_obj_t * obj, const lv_style_t * style, lv_style_selector_t selector)
 {
+    LV_ASSERT(obj->style_cnt < 63);
+
     trans_del(obj, selector, LV_STYLE_PROP_ANY, NULL);
 
     uint32_t i;
@@ -150,6 +152,11 @@ void lv_obj_remove_style(lv_obj_t * obj, const lv_style_t * style, lv_style_sele
     if(deleted && prop != LV_STYLE_PROP_INV) {
         lv_obj_refresh_style(obj, part, prop);
     }
+}
+
+void lv_obj_remove_style_all(struct _lv_obj_t * obj)
+{
+    lv_obj_remove_style(obj, NULL, LV_PART_ANY | LV_STATE_ANY);
 }
 
 void lv_obj_report_style_change(lv_style_t * style)
@@ -735,7 +742,7 @@ static void trans_anim_cb(void * _tr, int32_t v)
     for(i = 0; i < obj->style_cnt; i++) {
         if(obj->styles[i].is_trans == 0 || obj->styles[i].selector != tr->selector) continue;
 
-        lv_style_value_t value_final;
+        lv_style_value_t value_final = {0};
         switch(tr->prop) {
 
             case LV_STYLE_BORDER_SIDE:
